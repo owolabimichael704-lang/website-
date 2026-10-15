@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101d18">
+    <meta name="description" content="Private Touchline Market listing management.">
+    <title>Listing Admin | Touchline Market</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="admin.js" defer></script>
+</head>
+<body id="top">
+    <header class="site-header">
+        <a class="brand" href="index.html" aria-label="Touchline Market home">
+            <span class="brand-mark" aria-hidden="true">T<span>.</span></span>
+            <span class="brand-name">TOUCHLINE <small>ACCOUNT MARKET</small></span>
+        </a>
+        <nav class="main-nav" aria-label="Admin navigation">
+            <a href="market.html">View market</a>
+            <a href="SETUP.md">Setup guide</a>
+        </nav>
+        <button class="admin-signout" id="signout-button" type="button" hidden>Sign out</button>
+    </header>
+
+    <main class="admin-page">
+        <section class="admin-heading">
+            <p class="eyebrow eyebrow-dark">PRIVATE DASHBOARD <span class="heading-line"></span></p>
+            <h1>Manage your <em>listings.</em></h1>
+            <p>Update prices, details, availability, and account screenshots.</p>
+        </section>
+
+        <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
+
+        <section class="admin-login" id="login-panel" hidden>
+            <h2>Admin sign in</h2>
+            <form id="login-form" class="admin-form admin-login-form">
+                <label>Email<input name="email" type="email" autocomplete="username" required></label>
+                <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+                <button class="button button-dark" type="submit">Sign in</button>
+            </form>
+        </section>
+
+        <div class="admin-workspace" id="admin-workspace" hidden>
+            <section class="admin-editor">
+                <div class="admin-section-heading"><div><p class="eyebrow eyebrow-dark">LISTING EDITOR</p><h2 id="editor-title">Add an account</h2></div><button class="filter-reset" id="new-listing-button" type="button">New listing <span aria-hidden="true">+</span></button></div>
+                <form id="listing-form" class="admin-form">
+                    <input name="id" type="hidden">
+                    <label>Listing name<input name="name" maxlength="90" required></label>
+                    <label>Platform<select name="platform" required><option value="PlayStation">PlayStation</option><option value="Xbox">Xbox</option><option value="Mobile">Mobile</option><option value="PC">PC</option></select></label>
+                    <label>Squad rating<input name="rating" type="number" min="1" max="9999" required></label>
+                    <label>Price<input name="price" type="number" min="0" step="0.01" required></label>
+                    <label>Currency<select name="currency"><option>USD</option><option>NGN</option><option>GBP</option><option>EUR</option></select></label>
+                    <label>Listing badge<input name="tag" maxlength="40" placeholder="Featured, Great value..."></label>
+                    <label>Squad style<input name="condition" maxlength="60" placeholder="Balanced squad"></label>
+                    <label>Profile note<input name="record" maxlength="60" placeholder="League-ready"></label>
+                    <label>Standout players<input name="players" placeholder="Messi, Mbappé, Bellingham"></label>
+                    <label>WhatsApp number<input name="whatsapp_number" inputmode="numeric" pattern="[0-9]{8,15}" placeholder="Country code + number, digits only" required><span class="admin-help">Nigerian local numbers starting with 0 are saved with the 234 country code.</span></label>
+                    <label class="admin-field-wide">Description<textarea name="description" rows="3" maxlength="400"></textarea></label>
+                    <label>Status<select name="status"><option value="draft">Draft (private)</option><option value="active">Active (public)</option><option value="sold">Sold (hidden)</option></select></label>
+                    <label>Sort order<input name="sort_order" type="number" step="1" value="0"></label>
+                    <label class="admin-field-wide">Account screenshots<input name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple><span class="admin-help">Selecting images replaces this listing's current image set. JPG, PNG, or WebP; max 8 MB each.</span></label>
+                    <div class="admin-field-wide admin-existing-images" id="existing-images"></div>
+                    <div class="admin-form-actions admin-field-wide"><button class="button button-lime" type="submit">Save listing</button><button class="button button-dark" id="delete-listing-button" type="button" hidden>Delete listing</button></div>
+                </form>
+            </section>
+            <section class="admin-listings">
+                <div class="admin-section-heading"><div><p class="eyebrow eyebrow-dark">YOUR INVENTORY</p><h2>Listings</h2></div><span id="admin-listing-count">0</span></div>
+                <div class="admin-listing-filters">
+                    <label class="sr-only" for="admin-listing-search">Search your listings</label>
+                    <input id="admin-listing-search" type="search" placeholder="Search listings..." autocomplete="off">
+                    <label class="sr-only" for="admin-status-filter">Filter by status</label>
+                    <select id="admin-status-filter"><option value="all">All statuses</option><option value="active">Active</option><option value="draft">Draft</option><option value="sold">Sold</option></select>
+                </div>
+                <div class="admin-listing-rows" id="admin-listing-rows"></div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

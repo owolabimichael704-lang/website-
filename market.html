@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101d18">
+    <meta name="description" content="Browse eFootball account listings, compare squads and platforms, and contact owners directly.">
+    <title>The Market | Touchline Market</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body id="top">
+    <header class="site-header">
+        <a class="brand" href="index.html#home" aria-label="Touchline Market home">
+            <span class="brand-mark" aria-hidden="true">T<span>.</span></span>
+            <span class="brand-name">TOUCHLINE <small>ACCOUNT MARKET</small></span>
+        </a>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+            <span></span><span></span>
+        </button>
+        <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+            <a href="#market">The market</a>
+            <a href="index.html#how-it-works">How it works</a>
+            <a href="index.html#questions">Questions</a>
+        </nav>
+        <button class="shortlist-nav" id="shortlist-open" type="button">
+            <span>Shortlist</span><span class="nav-count" id="shortlist-count">0</span>
+        </button>
+    </header>
+
+    <main>
+        <section class="market-section" id="market">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow eyebrow-dark">THE TRANSFER WINDOW <span class="heading-line"></span></p>
+                    <h1>Find your <em>starting XI.</em></h1>
+                </div>
+                <p class="section-intro">Compare squads, platforms, and prices, then contact the owner directly with questions.</p>
+            </div>
+
+            <div class="market-toolbar">
+                <label class="search-field">
+                    <span class="sr-only">Search accounts</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+                    <input id="search-input" type="search" placeholder="Search players, platform, squad..." autocomplete="off">
+                    <kbd>/</kbd>
+                </label>
+                <div class="filter-controls">
+                    <label class="select-wrap"><span class="sr-only">Filter by platform</span>
+                        <select id="platform-filter"><option value="all">All platforms</option><option value="PlayStation">PlayStation</option><option value="Xbox">Xbox</option><option value="Mobile">Mobile</option><option value="PC">PC</option></select>
+                    </label>
+                    <label class="select-wrap"><span class="sr-only">Sort listings</span>
+                        <select id="sort-select"><option value="featured">Featured</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="rating">Squad rating</option></select>
+                    </label>
+                    <button class="filter-reset" id="reset-filters" type="button">Reset <span aria-hidden="true">↺</span></button>
+                </div>
+            </div>
+
+            <div class="results-row"><p><span id="result-count">0</span> accounts <span class="results-divider">/</span> <span class="results-muted">Curated for the next chapter</span></p><p class="currency-note">Prices shown per listing</p></div>
+            <p class="market-status" id="market-status" role="status" aria-live="polite" hidden></p>
+            <div class="listing-grid" id="listing-grid" aria-live="polite"></div>
+            <div class="empty-state" id="empty-state" hidden><span aria-hidden="true">⌕</span><h3>No accounts found.</h3><p>Try another search or clear your filters.</p><button class="button button-dark" id="empty-reset" type="button">Clear filters</button></div>
+
+            <aside class="buyer-checklist" aria-labelledby="buyer-checklist-title">
+                <h2 id="buyer-checklist-title">Before you make a move</h2>
+                <div><span>01</span><p>Ask for current, unedited in-game screenshots of the squad and account details.</p></div>
+                <div><span>02</span><p>Confirm platform, region, ownership, and exactly what is included before agreeing.</p></div>
+                <div><span>03</span><p>Never share passwords, verification codes, or recovery details in a message.</p></div>
+            </aside>
+            <p class="demo-note" id="market-note">The same account1.jpg squad image is used as a sample across these demo listings; names, ratings, and prices are examples, not verified seller offers. Request current in-game proof and verify transfer terms and the game's rules before any purchase.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a class="brand footer-brand" href="index.html#home"><span class="brand-mark" aria-hidden="true">T<span>.</span></span><span class="brand-name">TOUCHLINE <small>ACCOUNT MARKET</small></span></a>
+        <p>For the love of the game.<br><span>An independent marketplace concept.</span></p>
+        <a href="#top" class="back-top">Back to top <span aria-hidden="true">↑</span></a>
+        <div class="footer-bottom"><span>© 2026 TOUCHLINE MARKET</span><span>Not affiliated with KONAMI or eFootball™.</span><a href="index.html#questions">Marketplace information</a></div>
+    </footer>
+
+    <div class="shortlist-bar" id="shortlist-bar" hidden>
+        <p><span class="nav-count" id="bar-count">0</span> <span id="bar-label">accounts shortlisted</span></p>
+        <button id="bar-review" type="button">Review shortlist <span aria-hidden="true">↗</span></button>
+    </div>
+
+    <div class="modal-backdrop" id="modal-backdrop" hidden>
+        <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1">
+            <button class="dialog-close" id="dialog-close" type="button" aria-label="Close dialog">×</button>
+            <div id="dialog-content"></div>
+        </section>
+    </div>
+</body>
+</html>
