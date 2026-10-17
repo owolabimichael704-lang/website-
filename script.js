@@ -49,6 +49,13 @@ function formatPrice(listing) {
 	return new Intl.NumberFormat("en", { style: "currency", currency: listing.currency || "USD", maximumFractionDigits: 2 }).format(Number(listing.price));
 }
 
+function formatListingUpdate(listing) {
+	if (listing.isDemo) return "Sample listing";
+	if (!listing.updated_at) return "Update time unavailable";
+	const date = new Date(listing.updated_at);
+	return Number.isNaN(date.getTime()) ? "Update time unavailable" : `Updated ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date)}`;
+}
+
 function setMarketStatus(message, kind = "") {
 	const status = document.querySelector("#market-status");
 	if (!status) return;
@@ -67,7 +74,7 @@ async function loadLiveListings() {
 	}
 	listings = (data || []).map((listing) => ({ ...listing, images: listing.images || [], players: listing.players || [], isDemo: false }));
 	renderListings();
-	document.querySelector("#market-note").textContent = "Listings and images are provided by sellers. Confirm account access, listing details, transfer terms, and the game's rules before purchasing.";
+	document.querySelector("#market-note").textContent = "Listings and images are provided by sellers and are not independently verified. This site does not process payments or guarantee transfers. Account transfers may be restricted by the game's terms and can carry a risk of losing access; check applicable rules and confirm details before proceeding.";
 	setMarketStatus("Listings are live and update automatically.", "success");
 }
 
@@ -140,27 +147,32 @@ function closeDialog() {
 	if (lastFocusedElement && typeof lastFocusedElement.focus === "function") lastFocusedElement.focus();
 }
 
-function renderImagePreview(listing) {
+function renderImagePreview(listing, imageIndex = 0) {
 	if (!listing) return;
+	const index = ((imageIndex % listing.images.length) + listing.images.length) % listing.images.length;
 	dialog.classList.add("image-preview-dialog");
 	const imageDescription = `${listing.isDemo ? "Sample " : ""}eFootball account squad lineup for ${escapeHtml(listing.name)}`;
-	const imageCaption = listing.isDemo ? "Sample squad image" : "Account screenshot";
-	showDialog(`<h2 id="dialog-title" class="sr-only">${escapeHtml(listing.name)} account image</h2><img class="image-preview-full" src="${listing.images[0]}" alt="${imageDescription}"><p class="image-preview-caption">${escapeHtml(listing.name)} · ${imageCaption}</p>`);
+	const imageCaption = listing.isDemo ? "Sample squad image" : "Seller-provided screenshot";
+	showDialog(`<h2 id="dialog-title" class="sr-only">${escapeHtml(listing.name)} account image</h2><div class="image-preview-viewer">${listing.images.length > 1 ? `<button class="image-preview-nav image-preview-previous" type="button" data-action="image-step" data-step="-1" aria-label="Previous image">‹</button>` : ""}<img class="image-preview-full" src="${escapeHtml(listing.images[index])}" alt="${imageDescription}">${listing.images.length > 1 ? `<button class="image-preview-nav image-preview-next" type="button" data-action="image-step" data-step="1" aria-label="Next image">›</button>` : ""}</div><p class="image-preview-caption">${escapeHtml(listing.name)} · ${imageCaption} · ${index + 1} of ${listing.images.length}</p>`);
+	dialog.dataset.previewListingId = listing.id;
+	dialog.dataset.previewIndex = String(index);
 }
 
 function renderDetails(id) {
 	const listing = listings.find((item) => item.id === id);
 	if (!listing) return;
+	const images = listing.images || [];
 	showDialog(`
 		<p class="eyebrow eyebrow-dark">LISTING DETAILS <span class="heading-line"></span></p>
 		<h2 id="dialog-title">${escapeHtml(listing.name)}<em>.</em></h2>
-		<div class="detail-hero"><div class="detail-image-track" aria-label="${listing.isDemo ? "Sample " : ""}account squad image for ${escapeHtml(listing.name)}">${listing.images.map((image) => `<img src="${image}" alt="${listing.isDemo ? "Sample " : ""}eFootball account squad lineup" loading="lazy">`).join("")}</div><span class="detail-score">★ ${listing.rating.toLocaleString()} SQUAD RATING</span></div>
+		<div class="detail-hero"><div class="detail-image-track" aria-label="${listing.isDemo ? "Sample " : ""}account squad images for ${escapeHtml(listing.name)}">${images.map((image, index) => `<button class="image-preview-trigger" type="button" data-action="preview" data-id="${escapeHtml(listing.id)}" data-image-index="${index}" aria-label="View image ${index + 1} for ${escapeHtml(listing.name)}"><img src="${escapeHtml(image)}" alt="${listing.isDemo ? "Sample " : "Seller-provided "}eFootball account squad lineup" loading="lazy"></button>`).join("") || `<p class="detail-no-image">No account images provided.</p>`}</div><span class="detail-score">★ ${listing.rating.toLocaleString()} SQUAD RATING</span></div>
 		<p class="dialog-lede">${escapeHtml(listing.description)}</p>
 		<div class="detail-metrics"><div><span>Platform</span><strong>${escapeHtml(listing.platform)}</strong></div><div><span>Squad type</span><strong>${escapeHtml(listing.condition)}</strong></div><div><span>Profile</span><strong>${escapeHtml(listing.record)}</strong></div></div>
 		<p class="eyebrow eyebrow-dark">STANDOUT PLAYERS</p>
 		<div class="detail-players">${listing.players.map((player) => `<span class="player-chip">${escapeHtml(player)}</span>`).join("")}</div>
 		<div class="detail-actions"><div><span class="price-label">ASKING PRICE</span><strong>${formatPrice(listing)}</strong></div><a class="button button-lime" href="${createWhatsAppUrl([listing])}" target="_blank" rel="noopener noreferrer">Message owner on WhatsApp <span aria-hidden="true">↗</span></a></div>
-		<p class="small-print">Confirm account access, listing details, and transfer terms directly with the seller before purchasing.</p>`);
+		<p class="listing-updated">${escapeHtml(formatListingUpdate(listing))} · ${listing.isDemo ? "Example content, not a verified offer" : "Images and details supplied by the seller"}</p>
+		<p class="small-print">This site does not process payments or verify ownership. Account transfers may be restricted by the game's terms and can carry a risk of losing access. Confirm details and applicable rules with care; never share passwords or verification codes.</p>`);
 }
 
 function renderShortlist() {
@@ -195,7 +207,7 @@ listingGrid.addEventListener("click", (event) => {
 	if (!button) return;
 	if (button.dataset.action === "toggle") toggleShortlist(button.dataset.id);
 	if (button.dataset.action === "details") renderDetails(button.dataset.id);
-	if (button.dataset.action === "preview") renderImagePreview(listings.find((listing) => listing.id === button.dataset.id));
+	if (button.dataset.action === "preview") renderImagePreview(listings.find((listing) => listing.id === button.dataset.id), Number(button.dataset.imageIndex || 0));
 });
 
 dialogContent.addEventListener("click", (event) => {
@@ -203,6 +215,11 @@ dialogContent.addEventListener("click", (event) => {
 	if (!button) return;
 	if (button.dataset.action === "remove") toggleShortlist(button.dataset.id);
 	if (button.dataset.action === "close-and-browse") closeDialog();
+	if (button.dataset.action === "preview") renderImagePreview(listings.find((listing) => listing.id === button.dataset.id), Number(button.dataset.imageIndex || 0));
+	if (button.dataset.action === "image-step") {
+		const listing = listings.find((item) => item.id === dialog.dataset.previewListingId);
+		if (listing) renderImagePreview(listing, Number(dialog.dataset.previewIndex) + Number(button.dataset.step));
+	}
 });
 
 document.querySelector("#shortlist-open").addEventListener("click", renderShortlist);
@@ -254,4 +271,3 @@ mainNav.addEventListener("click", (event) => {
 		menuToggle.setAttribute("aria-label", "Open navigation");
 	}
 });
-

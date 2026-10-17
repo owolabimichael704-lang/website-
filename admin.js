@@ -248,7 +248,8 @@ listingForm.addEventListener("submit", async (event) => {
 			description: String(values.get("description")).trim(),
 			status: values.get("status"),
 			sort_order: Number(values.get("sort_order")) || 0,
-			images: listingImages
+			images: listingImages,
+			updated_at: new Date().toISOString()
 		};
 		const result = values.get("id")
 			? await client.from("listings").update(listing).eq("id", id).select().single()
